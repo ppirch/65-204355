@@ -73,7 +73,8 @@
     "thread": "cpp",
     "typeindex": "cpp",
     "typeinfo": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "t": "c"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }

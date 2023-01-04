@@ -1,6 +1,4 @@
-#include <iostream>
-#include <string>
-#include <vector>
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -9,43 +7,18 @@ int main()
   string inp;
   cin >> inp;
 
-  vector<char> curr;
+  list<char> lst;
+  auto it = lst.begin();
   for (char ch : inp)
   {
-    if (curr.empty())
-    {
-      curr.push_back(ch);
-    }
+    if (ch == '[')
+      it = lst.begin();
+    else if (ch == ']')
+      it = lst.end();
     else
-    {
-      // Find the maximum character in curr
-      char max_ch = curr[0];
-      for (size_t i = 1; i < curr.size(); i++)
-      {
-        if (curr[i] > max_ch)
-        {
-          max_ch = curr[i];
-        }
-      }
-
-      if (ch <= max_ch)
-      {
-        // Replace the maximum character in curr with ch
-        for (size_t i = 0; i < curr.size(); i++)
-        {
-          if (curr[i] == max_ch)
-          {
-            curr[i] = ch;
-            break;
-          }
-        }
-      }
-      else
-      {
-        curr.push_back(ch);
-      }
-    }
+      lst.insert(it, ch);
   }
-  cout << curr.size() << endl;
+  for (char ch : lst)
+    cout << ch;
   return 0;
 }
