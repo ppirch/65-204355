@@ -2,29 +2,28 @@
 
 using namespace std;
 
-int board[9][9] = {0};
-int rp = -1;
-
+int board[25][25] = {0};
+int N;
 set<string> s;
 bool isSafe(int r, int c)
 {
   // check border
-  if (r <= 0 || r > 8 || c <= 0 || c > 8)
+  if (r <= 0 || r > N || c <= 0 || c > N)
     return false;
   // check current
-  if (board[r][c] == 1)
+  if (board[r][c] == 1 || board[r][c] == -1)
     return false;
   // check row
-  for (int i = 1; i <= 8; ++i)
+  for (int i = 1; i <= N; ++i)
     if (board[r][i] == 1)
       return false;
   // check column
-  for (int i = 1; i <= 8; ++i)
+  for (int i = 1; i <= N; ++i)
     if (board[i][c] == 1)
       return false;
   // check diagonal
-  for (int i = 1; i <= 8; ++i)
-    for (int j = 1; j <= 8; ++j)
+  for (int i = 1; i <= N; ++i)
+    for (int j = 1; j <= N; ++j)
       if (board[i][j] == 1 && abs(i - r) == abs(j - c))
         return false;
 
@@ -34,8 +33,8 @@ bool isSafe(int r, int c)
 void printBoard()
 {
   string sol;
-  for (int j = 1; j <= 8; ++j)
-    for (int i = 1; i <= 8; ++i)
+  for (int j = 1; j <= N; ++j)
+    for (int i = 1; i <= N; ++i)
       if (board[i][j] == 1)
         sol += to_string(i) + " ";
 
@@ -44,23 +43,19 @@ void printBoard()
 
 bool placeQueen(int r, int c)
 {
-  if (r >= 9)
+  if (r >= N + 1)
   {
     printBoard();
     return true;
   }
   bool res = false;
-  for (int i = 1; i <= 8; ++i)
+  for (int i = 1; i <= N; ++i)
   {
     if (isSafe(r, i))
     {
       board[r][i] = 1;
       res = placeQueen(r + 1, i) || res;
       board[r][i] = 0;
-    }
-    else if (r == rp)
-    {
-      res = placeQueen(r + 1, i) || res;
     }
   }
   return res;
@@ -73,14 +68,22 @@ int main()
   int c;
   while (n--)
   {
-    for (int i = 1; i <= 8; ++i)
-      for (int j = 1; j <= 8; ++j)
+    cin >> N;
+
+    for (int i = 1; i <= N; ++i)
+      for (int j = 1; j <= N; ++j)
         board[i][j] = 0;
-    cin >> rp >> c;
-    board[rp][c] = 1;
+
+    string row;
+    for (int i = 1; i <= N; ++i)
+    {
+      cin >> row;
+      for (int j = 1; j <= N; ++j)
+        if (row[j - 1] == '*')
+          board[i][j] = -1;
+    }
     placeQueen(1, 1);
-    for (auto it = s.begin(); it != s.end(); ++it)
-      cout << *it << endl;
+    cout << s.size() << endl;
     s.clear();
   }
 
