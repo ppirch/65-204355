@@ -1,72 +1,63 @@
 #include <bits/stdc++.h>
+
 using namespace std;
 
-const int MAX = 100005;
+int arr[100005];
+int b;
+vector<vector<int>> segments;
 
-void update(int idx, int blk, int val, int bit[][MAX])
+int query(int l, int r, int x)
 {
-  for (; idx < MAX; idx += (idx & -idx))
-    bit[blk][idx] += val;
+  int res = 0, ls = l / b, rs = r / b;
+  if (ls == rs)
+  {
+    for (int i = l; i < r + 1; i++)
+      res += (arr[i] <= x);
+    return res;
+  }
+  for (int i = l; i < ls * b + b; i++)
+    if (arr[i] <= x)
+      res++;
+  for (int i = rs * b; i < r + 1; i++)
+    if (arr[i] <= x)
+      res++;
+  for (int i = ls + 1; i < rs; i++)
+  {
+    res += (int)((upper_bound(segments[i].begin(), segments[i].end(), x)) - segments[i].begin());
+  }
+  return res;
 }
 
-int query(int l, int r, int k, int arr[], int blk_sz,
-          int bit[][MAX])
+void update(int pos, int val)
 {
-  int sum = 0;
-  while (l < r && l % blk_sz != 0 && l != 0)
-  {
-    if (arr[l] <= k)
-      sum++;
-    l++;
-  }
-
-  while (l + blk_sz <= r)
-  {
-    int idx = k;
-    for (; idx > 0; idx -= idx & -idx)
-      sum += bit[l / blk_sz][idx];
-    l += blk_sz;
-  }
-
-  while (l <= r)
-  {
-    if (arr[l] <= k)
-      sum++;
-    l++;
-  }
-  return sum;
-}
-
-void preprocess(int arr[], int blk_sz, int n, int bit[][MAX])
-{
-  for (int i = 0; i < n; i++)
-    update(arr[i], i / blk_sz, 1, bit);
-}
-
-void preprocessUpdate(int i, int v, int blk_sz,
-                      int arr[], int bit[][MAX])
-{
-  update(arr[i], i / blk_sz, -1, bit);
-  update(v, i / blk_sz, 1, bit);
-  arr[i] = v;
+  int s = pos / b;
+  int x = segments[s].size();
+  for (int i = 0; i < x; i++)
+    if (segments[s][i] == arr[pos])
+    {
+      segments[s][i] = val;
+      break;
+    }
+  arr[pos] = val;
+  sort(segments[s].begin(), segments[s].end());
+  return;
 }
 
 int main()
 {
-
   int n, q;
   scanf("%d %d", &n, &q);
 
-  int arr[n + 5];
-  for (int i = 0; i < n; i++)
+  for (int i = 1; i <= n; i++)
     scanf("%d", &arr[i]);
 
-  int blk_sz = sqrt(n);
+  b = ceil(sqrt(n));
+  segments.resize(n + 1);
+  for (int i = 1; i <= n; i++)
+    segments[i / b].push_back(arr[i]);
 
-  int bit[blk_sz + 1][MAX];
-  memset(bit, 0, sizeof(bit));
-
-  preprocess(arr, blk_sz, n, bit);
+  for (int i = 0; i <= b; i++)
+    sort(segments[i].begin(), segments[i].end());
 
   for (int i = 0; i < q; i++)
   {
@@ -74,17 +65,17 @@ int main()
     scanf(" %c", &cmd);
     if (cmd == 'C')
     {
-      // query elments less than or equal to k
+      // count number of elements in range [s, t] <= k
       int s, t, k;
       scanf("%d %d %d", &s, &t, &k);
-      printf("%d\n", query(s - 1, t - 1, k, arr, blk_sz, bit));
+      printf("%d\n", query(s, t, k));
     }
     else
     {
-      // update element at index x - 1 to value y
+      // update arr[x] = y
       int x, y;
       scanf("%d %d", &x, &y);
-      preprocessUpdate(x - 1, y, blk_sz, arr, bit);
+      update(x, y);
     }
   }
   return 0;
