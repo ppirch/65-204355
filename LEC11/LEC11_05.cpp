@@ -2,89 +2,71 @@
 
 using namespace std;
 
-int board[25][25] = {0};
+char board[20][20];
 int N;
-set<string> s;
+
 bool isSafe(int r, int c)
 {
+  int i, j;
   // check border
-  if (r <= 0 || r > N || c <= 0 || c > N)
+  if (r < 0 || r >= N || c < 0 || c >= N)
     return false;
   // check current
-  if (board[r][c] == 1 || board[r][c] == -1)
+  if (board[r][c] == 'Q' || board[r][c] == '*')
     return false;
-  // check row
-  for (int i = 1; i <= N; ++i)
-    if (board[r][i] == 1)
-      return false;
+
   // check column
-  for (int i = 1; i <= N; ++i)
-    if (board[i][c] == 1)
+  for (i = 0; i < N; ++i)
+    if (board[i][c] == 'Q')
       return false;
-  // check diagonal
-  for (int i = 1; i <= N; ++i)
-    for (int j = 1; j <= N; ++j)
-      if (board[i][j] == 1 && abs(i - r) == abs(j - c))
-        return false;
+
+  /* Check upper diagonal on left side */
+  for (i = r, j = c; i >= 0 && j >= 0; --i, --j)
+    if (board[i][j] == 'Q')
+      return false;
+
+  /* Check lower diagonal on left side */
+  for (i = r, j = c; j >= 0 && i < N; ++i, --j)
+    if (board[i][j] == 'Q')
+      return false;
+
+  /* Check upper diagonal on right side */
+  for (i = r, j = c; i >= 0 && j < N; --i, ++j)
+    if (board[i][j] == 'Q')
+      return false;
 
   return true;
 }
 
-void printBoard()
+int placeQueen(int r)
 {
-  string sol;
-  for (int j = 1; j <= N; ++j)
-    for (int i = 1; i <= N; ++i)
-      if (board[i][j] == 1)
-        sol += to_string(i) + " ";
-
-  s.insert(sol);
-}
-
-bool placeQueen(int r, int c)
-{
-  if (r >= N + 1)
-  {
-    printBoard();
-    return true;
-  }
-  bool res = false;
-  for (int i = 1; i <= N; ++i)
+  if (r >= N)
+    return 1;
+  int cnt = 0;
+  for (int i = 0; i < N; ++i)
   {
     if (isSafe(r, i))
     {
-      board[r][i] = 1;
-      res = placeQueen(r + 1, i) || res;
-      board[r][i] = 0;
+      board[r][i] = 'Q';
+      cnt += placeQueen(r + 1);
+      board[r][i] = '.';
     }
   }
-  return res;
+  return cnt;
 }
+
 int main()
 {
   ios::sync_with_stdio(false);
   int n;
-  cin >> n;
-  int c;
+  scanf("%d", &n);
+
   while (n--)
   {
-    cin >> N;
-
-    for (int i = 1; i <= N; ++i)
-      for (int j = 1; j <= N; ++j)
-        board[i][j] = 0;
-
-    string row;
-    for (int i = 1; i <= N; ++i)
-    {
-      cin >> row;
-      for (int j = 1; j <= N; ++j)
-        if (row[j - 1] == '*')
-          board[i][j] = -1;
-    }
-    placeQueen(1, 1);
-    cout << s.size() << endl;
-    s.clear();
+    scanf("%d", &N);
+    for (int i = 0; i < N; ++i)
+      scanf(" %s", &board[i]);
+    printf("%d\n", placeQueen(0));
   }
 
   return 0;
