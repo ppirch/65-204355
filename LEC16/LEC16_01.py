@@ -3,33 +3,34 @@ graphs = []
 for _ in range(nodes):
     graphs.append(input().split())
 
-queue = []
-visited = [False for _ in range(nodes)]
+answers = [[] for _ in range(nodes)]
 
-dominator = {}
-
-start = 0
-
-queue.append(start)
-visited[start] = True
-parents = {}
+mark = [False] * nodes
+mark[0] = True
+queue = [0]
 while queue:
     node = queue.pop(0)
-    try:
-        parents[node] = parents[node] | set([node])
-    except:
-        parents[node] = set([node])
-    for i in range(nodes):
-        if graphs[node][i] == '1' and not visited[i]:
-            parents[i] = parents[node] | set([i])
+    for i, is_edge in enumerate(graphs[node]):
+        if not mark[i] and is_edge == '1':
+            mark[i] = True
             queue.append(i)
-            visited[i] = True
-childs = {}
-for i in range(nodes):
-    for j in range(nodes):
-        if i in parents[j]:
-            try:
-                childs[i] = childs[i] | set([j])
-            except:
-                childs[i] = set([j])
-print(childs)
+
+for skip in range(nodes):
+    visited = [False] * nodes
+    visited[0] = True
+    queue = [0]
+    while queue:
+        node = queue.pop(0)
+        for i, is_edge in enumerate(graphs[node]):
+            if not visited[i] and is_edge == '1' and i != skip:
+                visited[i] = True
+                queue.append(i)
+    for i, v in enumerate(visited):
+        if not mark[i]:
+            answers[skip].append("N")
+        elif not v or skip == 0:
+            answers[skip].append("Y")
+        else:
+            answers[skip].append("N")
+for answer in answers:
+    print("".join(answer))

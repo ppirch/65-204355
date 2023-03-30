@@ -1,10 +1,11 @@
 #include <bits/stdc++.h>
 using namespace std;
 typedef vector<int> vi;
-#define MAX_V 105
+#define MAX_V 55
 #define INF 1000000000
 int res[MAX_V][MAX_V], mf, f, s, t; // global variables
-vi p;                               // p stores the BFS spanning tree from s
+int graph[MAX_V][MAX_V];
+vi p; // p stores the BFS spanning tree from s
 void augment(int v, int minEdge)
 {
   // traverse BFS spanning tree from s to t
@@ -34,8 +35,9 @@ int main()
   {
     int u, v, w;
     scanf("%d %d %d", &u, &v, &w);
-    res[u][v] += w;
-    res[v][u] += w;
+    graph[u][v] = graph[v][u] = w;
+    res[u][v] = w;
+    res[v][u] = w;
   }
   mf = 0;
   while (1)
@@ -53,7 +55,7 @@ int main()
       q.pop();
       if (u == t)
         break; // stop BFS if we already reach sink t
-      for (int v = 0; v < MAX_V; v++)
+      for (int v = 1; v <= V; v++)
         if (res[u][v] > 0 && dist[v] == INF)
         {
           dist[v] = dist[u] + 1;
@@ -65,13 +67,34 @@ int main()
       break; // we cannot send any more flow (`f' = 0), terminate
     mf += f; // we can still send a flow, increase the max flow!
   }
-  for (int i = 0; i < MAX_V; i++)
+
+  queue<int> q;
+  q.push(s);
+  int visited[MAX_V];
+  memset(visited, 0, sizeof visited);
+  visited[s] = 1;
+  while (!q.empty())
   {
-    for (int j = 0; j < MAX_V; j++)
+    int u = q.front();
+    q.pop();
+    for (int v = 1; v <= V; v++)
     {
-      printf("%d ", res[i][j]);
+      if (res[u][v] > 0 && visited[v] == 0)
+      {
+        visited[v] = 1;
+        q.push(v);
+      }
     }
-    printf("\n");
+  }
+  for (int i = 1; i <= V; i++)
+  {
+    for (int j = 1; j <= V; j++)
+    {
+      if (visited[i] && !visited[j] && graph[i][j] > 0)
+      {
+        printf("%d %d\n", i, j);
+      }
+    }
   }
   // printf("%d\n", mf); // this is the max flow value
   return 0;
