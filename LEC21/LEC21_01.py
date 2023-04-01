@@ -1,81 +1,75 @@
-from queue import Queue
+from collections import deque
 
-src = 38
-snk = 39
-INF = 2e9
-
-gph = [[] for _ in range(40)]
-p = [-1] * 40
-rgph = [[0] * 40 for _ in range(40)]
+source = ord("+")
+sink = ord("-")
+g = [[] for _ in range(256)]
 
 
 def bfs():
-    global p
-    p = [-1] * 40
-    p[src] = -2
-    q = Queue()
-    q.put((src, INF))
-    while not q.empty():
-        u, f = q.get()
-        for v in gph[u]:
-            if p[v] != -1 or rgph[u][v] == 0:
-                continue
-            p[v] = u
-            nf = min(f, rgph[u][v])
-            if v == snk:
-                return nf
-            q.put((v, nf))
-    return 0
+    prev = [-1] * 256
+    prev[source] = -2
+    q = deque()
+    q.append(source)
+    while q:
+        u = q.popleft()
+        for v, cap in g[u]:
+            if cap > 0 and prev[v] == -1:
+                prev[v] = u
+                q.append(v)
+                if v == sink:
+                    return find_augment(prev)
+    return None
 
 
-def addEdge(u, v):
-    gph[u].append(v)
-    gph[v].append(u)
+def find_augment(prev):
+    flow = float("inf")
+    v = sink
+    while v != source:
+        u = prev[v]
+        for i, (iv, icap) in enumerate(g[u]):
+            if iv == v:
+                flow = min(flow, icap)
+                g[u][i] = (iv, icap - flow)
+                found = False
+                for j, (jv, jcap) in enumerate(g[v]):
+                    if jv == u:
+                        g[v][j] = (jv, jcap + flow)
+                        found = True
+                        break
+                if not found:
+                    g[v].append((u, flow))
+        v = u
+    return flow
 
 
-# main function
-t = int(input())
-# t = 1
-rqr = 0
-for I in range(t):
-    c, n, s = input().split()
-    # c, n, s = 'A', 3, '0B9'
-    n = int(n)
-    u = ord(c) - ord('A')
-    rqr += rgph[src][u] = n
-    addEdge(src, u)
-    for i in range(len(s)):
-        if not s[i].isalnum():
+n = int(input())
+nump = 0
+for _ in range(n):
+    app, user, comp = input().split()
+    user = int(user)
+    nump += user
+    g[source].append((ord(app), user))
+    for com in comp:
+        if com == ";":
             break
-        v = 26 + int(s[i])
-        rgph[u][v] = rgph[v][snk] = 1
+        g[ord(app)].append((ord(com), 1))
+for com in "0123456789":
+    if com.isdigit():
+        g[ord(com)].append((sink, 1))
 
-for u in range(40):
-    for v in range(u+1, 40):
-        if rgph[u][v]:
-            addEdge(u, v)
+max_flow = 0
+while True:
+    path = bfs()
+    if path is None:
+        break
+    max_flow += path
 
-nf, mxf = 0, 0
-while (nf := bfs()):
-    mxf += nf
-    u = snk
-    while u != src:
-        v = p[u]
-        rgph[v][u] -= nf
-        rgph[u][v] += nf
-        u = v
-
-if mxf != rqr:
+if max_flow != nump:
     print("!")
 else:
-    rlt = ['_' for _ in range(11)]
-    for i in range(26):
-        if not gph[i]:
-            continue
-        for j in range(26, 26+10):
-            idx = j - 26
-            if rlt[idx] == '_':
-                rlt[idx] = chr(i + ord('A'))
-            if rgph[j][i] and rlt[idx] == '_':
-                rlt[idx] = chr(i + ord('A'))
-    print(''.join(rlt))
+    answer = ["_"] * 10
+    for node in range(ord("A"), ord("Z") + 1):
+        for edge in g[node]:
+            if edge[0] in range(ord("0"), ord("9") + 1) and edge[1] == 0:
+                answer[edge[0] - ord("0")] = chr(node)
+    print("".join(answer))
