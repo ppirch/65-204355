@@ -1,40 +1,39 @@
 #include <bits/stdc++.h>
-
 using namespace std;
 
-int main()
+int dp[101][101];
+    
+int mincost(int start, int end, vector<int>& cuts, int cuts_start, int cuts_end)
 {
-  ios::sync_with_stdio(false);
+	if(cuts_start>cuts_end)
+		return 0;
+	
+	if(dp[cuts_start][cuts_end]!=-1)
+		return dp[cuts_start][cuts_end];
+	
+	int minimum = INT_MAX;
+	for(int i=cuts_start; i<=cuts_end; i++)
+		minimum = min(minimum, (end-start)+mincost(start, cuts[i], cuts, cuts_start, i-1)+mincost(cuts[i], end, cuts, i+1, cuts_end));
+	
+	return dp[cuts_start][cuts_end] = minimum;
+}
 
-  int L;
-  cin >> L;
-  int n;
-  cin >> n;
-  int c[n + 1];
-  for (int i = 0; i < n; i++)
-  {
-    cin >> c[i];
-  }
+int minCost(int n, vector<int>& cuts) {
 
-  int dp[n + 1][L + 1];
-  memset(dp, 0, sizeof dp);
+	memset(dp,-1,sizeof(dp));
+	sort(cuts.begin(),cuts.end());
+	return mincost(0, n, cuts, 0, cuts.size()-1);
+}
 
-  for (int i = 1; i <= n; i++)
-  {
-    for (int j = 1; j <= L; j++)
-    {
-      if (j >= c[i - 1])
-      {
-        dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - c[i - 1]] + c[i - 1]);
-      }
-      else
-      {
-        dp[i][j] = dp[i - 1][j];
-      }
-    }
-  }
-
-  cout << dp[n][L] << endl;
-
-  return 0;
+int main(){
+	int n, c, t;
+	vector<int> cuts;
+	cin>>n;
+	cin>>c;
+	for(int i=0;i<c;i++){
+		cin>>t;
+		cuts.push_back(t);
+	}
+	cout<<minCost(n, cuts);
+	return 0;
 }

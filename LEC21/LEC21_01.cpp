@@ -1,110 +1,139 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <cstring>
+#include <queue>
+
 using namespace std;
 
-const int src = 38;
-const int snk = 39;
-const int INF = 2e9;
+int source = '+';
+int sink = '-';
 
-vector<int> gph[40];
-int p[40];
-int rgph[40][40]; // alphabet + number
+vector<pair<int, int>> g[256];
+
 int bfs()
 {
-  fill(p, p + 40, -1);
-  p[src] = -2;
-  queue<pair<int, int>> q;
-  q.push({src, INF});
+  int prev[256];
+  memset(prev, -1, sizeof(prev));
+  queue<int> q;
+  q.push(source);
   while (!q.empty())
   {
-    int u = q.front().first;
-    int f = q.front().second;
+    int u = q.front();
     q.pop();
-    for (int v : gph[u])
+    for (auto edge : g[u])
     {
-      if (p[v] != -1 || rgph[u][v] == 0)
-        continue;
-      p[v] = u;
-      int nf = min(f, rgph[u][v]);
-      if (v == snk)
-        return nf;
-      q.push({v, nf});
+      int v = edge.first;
+      int cap = edge.second;
+      if (cap > 0 && prev[v] == -1)
+      {
+        prev[v] = u;
+        q.push(v);
+        if (v == sink)
+        {
+          int flow = 1e9;
+          for (int v = sink; v != source; v = prev[v])
+          {
+            int u = prev[v];
+            for (auto &edge : g[u])
+            {
+              if (edge.first == v)
+              {
+                flow = min(flow, edge.second);
+                break;
+              }
+            }
+          }
+          for (int v = sink; v != source; v = prev[v])
+          {
+            int u = prev[v];
+            for (auto &edge : g[u])
+            {
+              if (edge.first == v)
+              {
+                edge.second -= flow;
+                break;
+              }
+            }
+            bool found = false;
+            for (auto &edge : g[v])
+            {
+              if (edge.first == u)
+              {
+                edge.second += flow;
+                found = true;
+                break;
+              }
+            }
+            if (!found)
+            {
+              g[v].push_back({u, flow});
+            }
+          }
+          return flow;
+        }
+      }
     }
   }
   return 0;
 }
 
-void addEdge(int u, int v)
-{
-  gph[u].push_back(v);
-  gph[v].push_back(u);
-}
-
 int main()
 {
-  // freopen("input.txt", "r", stdin);
-  int t;
-  scanf("%d", &t);
-  int rqr = 0;
-  for (int I = 0; I < t; ++I)
+  ios::sync_with_stdio(false);
+  int n;
+  cin >> n;
+  int nump = 0;
+  while (n--)
   {
-    char c;
-    int n;
-    char s[105];
-    scanf(" %c %d %s", &c, &n, s);
-    int u = c - 'A';
-    rqr += rgph[src][u] = n;
-    addEdge(src, u);
-    for (int i = 0; s[i]; ++i)
+    char app, comp[15];
+    int user;
+    cin >> app >> user >> comp;
+    nump += user;
+    int len = strlen(comp);
+    g[source].push_back({(int)app, user});
+    for (int i = 0; i < len; i++)
     {
-      if (!isalnum(s[i]))
+      char com = comp[i];
+      if (com == ';')
+      {
         break;
-      int v = 26 + s[i] - '0';
-      rgph[u][v] = rgph[v][snk] = 1;
+      }
+      g[(int)app].push_back({(int)com, 1});
     }
   }
-
-  for (int u = 0; u < 40; ++u)
+  for (auto com : "0123456789")
   {
-    for (int v = u + 1; v < 40; ++v)
+    if (isdigit(com))
     {
-      if (rgph[u][v])
-        addEdge(u, v);
+      g[(int)com].push_back({sink, 1});
     }
   }
-
-  int nf, mxf = 0;
-  while (nf = bfs())
+  int max_flow = 0;
+  while (true)
   {
-    mxf += nf;
-    int u = snk;
-    while (u != src)
+    int flow = bfs();
+    if (flow == 0)
     {
-      int v = p[u];
-      rgph[v][u] -= nf;
-      rgph[u][v] += nf;
-      u = v;
+      break;
     }
+    max_flow += flow;
   }
-
-  if (mxf != rqr)
-    return printf("!"), 0;
-
-  char rlt[15] = {};
-  for (int i = 0; i < 26; ++i)
+  if (max_flow != nump)
   {
-    if (gph[i].size() == 0)
-      continue;
-    for (int j = 26; j < 26 + 10; ++j)
+    cout << "!\n";
+    return 0;
+  }
+  char answer[] = "__________";
+  for (auto node : "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+  {
+    for (auto edge : g[node])
     {
-      int idx = j - 26;
-      if (rlt[idx] == 0)
-        rlt[idx] = '_';
-      if (rgph[j][i] && rlt[idx] == '_')
-        rlt[idx] = (char)i + 'A';
+      if (isdigit(edge.first) && edge.second == 0)
+      {
+        answer[edge.first - '0'] = node;
+      }
     }
   }
-  rlt[10] = '\0';
-
-  printf("%s\n", rlt);
+  cout << answer << "\n";
   return 0;
 }

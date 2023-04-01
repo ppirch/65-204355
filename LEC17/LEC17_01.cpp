@@ -1,55 +1,42 @@
-#include <bits/stdc++.h>
+#include <stdio.h>
+#include <string.h>
 
-using namespace std;
+char map[105][105], used[105][105];
+int ans;
+void dfs(int x, int y) {
+    if(x < 0 || y < 0 || map[x][y] == 0)
+        return;
+    if(used[x][y] != 0 || map[x][y] != 'W')
+        return;
+    used[x][y] = 1;
+    ans++;
+    int i, j;
+    for(i = -1; i <= 1; i++)
+        for(j = -1; j <= 1; j++)
+            dfs(x+i, y+j);
+}
+int main() {
+    int t, i, j;
+    char str[105];
 
-typedef pair<int, int> pii;
-
-int main()
-{
-  vector<string> graph;
-  vector<pii> pos;
-  while (true)
-  {
-    string line;
-    getline(cin, line);
-    if (isdigit(line[0]))
-    {
-      int x, y;
-      istringstream ss(line);
-      ss >> x >> y;
-      pos.push_back({x, y});
-    }
-    else
-      graph.push_back(line);
-    if (cin.eof())
-      break;
-  }
-
-  for (auto p : pos)
-  {
-    set<pii> visited;
-    queue<pii> q;
-    q.push({p.first, p.second});
-    while (!q.empty())
-    {
-      pii u = q.front();
-      q.pop();
-      visited.insert(u);
-      char start = graph[u.first][u.second];
-      for (int i = -1; i <= 1; i++)
-        for (int j = -1; j <= 1; j++)
-        {
-          pii v = {u.first + i, u.second + j};
-          if (v.first < 0 || v.first >= graph.size() || v.second < 0 || v.second >= graph[0].size())
-            continue;
-          if ((graph[v.first][v.second] == 'W') && visited.find(v) == visited.end())
-            q.push(v);
+    memset(map, 0, sizeof(map));
+    int n = 0;
+    while(gets(str)) {
+        if(str[0] == '\0')
+            break;
+        if(str[0] != 'W' && str[0] != 'L') {
+            sscanf(str, "%d %d", &i, &j);
+            memset(used, 0, sizeof(used));
+            ans = 0;
+            dfs(i-1, j-1);
+            printf("%d\n", ans);
+        } else {
+            sscanf(str, "%s", map[n]);
+            n++;
         }
     }
-    int count = 0;
-    for (auto u : visited)
-      if (graph[u.first][u.second] == 'W')
-        count++;
-    cout << count << endl;
-  }
+    if(t)
+        puts("");
+
+    return 0;
 }

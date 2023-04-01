@@ -27,9 +27,7 @@ int main()
   scanf("%d", &V);
   memset(res, 0, sizeof res);
   int c;
-  scanf("%d", &c);
-  s = 1;
-  t = 2;
+  scanf("%d %d %d", &s, &t, &c);
   for (int i = 0; i < c; i++)
   {
     int u, v, w;
@@ -65,14 +63,6 @@ int main()
       break; // we cannot send any more flow (`f' = 0), terminate
     mf += f; // we can still send a flow, increase the max flow!
   }
-  for (int i = 0; i < MAX_V; i++)
-  {
-    for (int j = 0; j < MAX_V; j++)
-    {
-      printf("%d ", res[i][j]);
-    }
-    printf("\n");
-  }
-  // printf("%d\n", mf); // this is the max flow value
+  printf("%d\n", mf); // this is the max flow value
   return 0;
 }

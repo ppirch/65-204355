@@ -36,10 +36,8 @@ int main()
       while (true)
       {
         if (r - ans < 0 || r + ans >= m || c - ans < 0 || c + ans >= n)
-        {
-          ans -= 1;
-          break;
-        }
+          {ans -=1;
+            break;}
         for (int i = r - ans; i <= r + ans; ++i)
         {
           for (int j = c - ans; j <= c + ans; ++j)
